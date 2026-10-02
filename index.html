@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen de Colecta de Sangre - Centro Productor de Sangre y Terapia Celular</title>
+  <!-- Librería para descarga directa en PDF sin abrir ventana de impresión -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
       --primary: #c9182b;
@@ -52,10 +54,10 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
-      padding: 9px 18px;
+      padding: 10px 20px;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 13.5px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -391,36 +393,6 @@
       line-height: 1.4;
     }
 
-    /* Impresión */
-    @media print {
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .app-container {
-        display: block !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-      }
-      .preview-wrapper {
-        position: static !important;
-      }
-      .report-sheet {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      @page {
-        margin: 1.2cm 1.4cm;
-        size: letter portrait;
-      }
-    }
-
     @media (max-width: 1024px) {
       .app-container {
         grid-template-columns: 1fr;
@@ -433,25 +405,26 @@
 </head>
 <body>
 
-  <!-- Barra de Acciones -->
-  <header class="topbar no-print">
+  <!-- Barra Superior -->
+  <header class="topbar">
     <div>
       <div class="topbar-title">Centro Productor de Sangre y Terapia Celular</div>
       <div class="topbar-subtitle">Generador de Informe Operativo de Colecta</div>
     </div>
-    <button class="btn-export" onclick="window.print()">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+    <!-- Botón directo de descarga PDF -->
+    <button class="btn-export" onclick="descargarPDFDirecto()">
+      <svg width="17" height="17" fill="currentColor" viewBox="0 0 16 16">
         <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
         <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
       </svg>
-      Guardar como PDF / Imprimir
+      Descargar PDF
     </button>
   </header>
 
   <div class="app-container">
     
-    <!-- COLUMNA IZQUIERDA: Formulario -->
-    <div class="form-card no-print">
+    <!-- COLUMNA IZQUIERDA: Formulario Limpio -->
+    <div class="form-card">
       <div class="form-header">
         <h2>Completar Datos</h2>
         <button type="button" class="btn-clear" onclick="limpiar()">Limpiar campos</button>
@@ -462,41 +435,40 @@
         
         <div class="form-group">
           <label>Institución / Lugar</label>
-          <input type="text" id="f_institucion" placeholder="Ej: LUISITO – CENTRO LOGISTICO" value="LUISITO – CENTRO LOGISTICO">
+          <input type="text" id="f_institucion" placeholder="Ej: LUISITO – CENTRO LOGISTICO">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Fecha</label>
-            <input type="text" id="f_fecha" placeholder="Ej: 30 – 09 – 2026" value="30 – 09 – 2026">
+            <input type="text" id="f_fecha" placeholder="Ej: 30 – 09 – 2026">
           </div>
           <div class="form-group">
             <label>Ciudad</label>
-            <input type="text" id="f_ciudad" placeholder="Ej: SAN LORENZO" value="SAN LORENZO">
+            <input type="text" id="f_ciudad" placeholder="Ej: SAN LORENZO">
           </div>
         </div>
 
         <div class="form-group">
           <label>Horario</label>
-          <input type="text" id="f_horario" placeholder="Ej: 08:30 A 14:00 HS" value="08:30 A 14:00 HS">
+          <input type="text" id="f_horario" placeholder="Ej: 08:30 A 14:00 HS">
         </div>
 
-        <!-- SECCIÓN DE RESPONSABLES / OPERATIVO -->
         <span class="section-tag">Responsables y Operativo</span>
 
         <div class="form-group">
           <label>Encargado/a de Colecta</label>
-          <input type="text" id="f_encargado_colecta" placeholder="Ej: LIC. ROSSANA BARBOZA" value="LIC. ROSSANA BARBOZA">
+          <input type="text" id="f_encargado_colecta" placeholder="Ej: LIC. ROSSANA BARBOZA">
         </div>
 
         <div class="form-group">
           <label>Encargado/a Institución receptora (Opcional)</label>
-          <input type="text" id="f_encargado_inst" placeholder="Ej: LIC. CLARA CABRERA (dejar vacío si no estuvo)" value="LIC. CLARA CABRERA">
+          <input type="text" id="f_encargado_inst" placeholder="Ej: LIC. CLARA CABRERA">
         </div>
 
         <div class="form-group">
           <label>Administrativo (Elaboró el informe)</label>
-          <input type="text" id="f_administrativo" placeholder="Ej: Ing. Rodney Cañete" value="Ing. Rodney Cañete">
+          <input type="text" id="f_administrativo" placeholder="Ej: Ing. Rodney Cañete">
         </div>
 
         <span class="section-tag">Métricas de la Jornada</span>
@@ -504,33 +476,33 @@
         <div class="form-row">
           <div class="form-group">
             <label>Donantes Atendidos</label>
-            <input type="number" id="f_atendidos" value="20" oninput="autoCalcular()">
+            <input type="number" id="f_atendidos" placeholder="0" oninput="autoCalcular()">
           </div>
           <div class="form-group">
             <label>Donantes Efectivos</label>
-            <input type="number" id="f_efectivos" value="16" oninput="autoCalcular()" style="font-weight:700; color:#047857;">
+            <input type="number" id="f_efectivos" placeholder="0" oninput="autoCalcular()" style="font-weight:700; color:#047857;">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Volúmenes Equivalentes</label>
-            <input type="number" id="f_volumenes" value="48">
+            <input type="number" id="f_volumenes" placeholder="0">
           </div>
           <div class="form-group">
             <label>Vidas Asistidas</label>
-            <input type="number" id="f_vidas" value="48" style="font-weight:700; color:#dc2626;">
+            <input type="number" id="f_vidas" placeholder="0" style="font-weight:700; color:#dc2626;">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Diferimientos Temporales</label>
-            <input type="text" id="f_diftemp" value="4">
+            <input type="text" id="f_diftemp" placeholder="0">
           </div>
           <div class="form-group">
             <label>Diferimientos Permanentes</label>
-            <input type="text" id="f_difperm" value="-">
+            <input type="text" id="f_difperm" placeholder="-">
           </div>
         </div>
 
@@ -541,24 +513,24 @@
       </form>
     </div>
 
-    <!-- COLUMNA DERECHA: Vista Previa e Informe Imprimible -->
+    <!-- COLUMNA DERECHA: Vista Previa e Informe a Exportar -->
     <div class="preview-wrapper">
-      <div class="preview-label no-print">
-        <span>Vista previa de salida</span>
+      <div class="preview-label">
+        <span>Vista previa del informe</span>
         <span>Uso privado</span>
       </div>
 
-      <div class="report-sheet">
+      <div class="report-sheet" id="areaReporte">
         <!-- Membrete con Logo Oficial -->
         <div class="report-header">
           <div class="logo-container">
-            <img id="report_logo" src="logocps.jpg" alt="Centro Productor de Sangre y Terapia Celular">
+            <img id="report_logo" src="logocps.jpg" alt="Centro Productor de Sangre y Terapia Celular"[cite: 2]>
           </div>
           
           <div class="report-badge-container">
             <span class="report-badge">INFORME OPERATIVO</span>
             <div class="report-main-title">RESUMEN DE COLECTA</div>
-            <div class="report-sub-title" id="out_institucion">LUISITO – CENTRO LOGISTICO</div>
+            <div class="report-sub-title" id="out_institucion">--</div>
           </div>
         </div>
 
@@ -566,15 +538,15 @@
         <div class="meta-box">
           <div class="meta-item">
             <span class="meta-label">Fecha</span>
-            <span class="meta-val" id="out_fecha">30 – 09 – 2026</span>
+            <span class="meta-val" id="out_fecha">--</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Ciudad</span>
-            <span class="meta-val" id="out_ciudad">SAN LORENZO</span>
+            <span class="meta-val" id="out_ciudad">--</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Horario</span>
-            <span class="meta-val" id="out_horario">08:30 A 14:00 HS</span>
+            <span class="meta-val" id="out_horario">--</span>
           </div>
         </div>
 
@@ -582,15 +554,15 @@
         <div class="staff-box" id="staff_box">
           <div class="staff-item">
             <span class="staff-label">Encargado/a Colecta</span>
-            <span class="staff-val" id="out_encargado_colecta">LIC. ROSSANA BARBOZA</span>
+            <span class="staff-val" id="out_encargado_colecta">--</span>
           </div>
           <div class="staff-item" id="container_encargado_inst">
             <span class="staff-label">Encargado/a Institución</span>
-            <span class="staff-val" id="out_encargado_inst">LIC. CLARA CABRERA</span>
+            <span class="staff-val" id="out_encargado_inst">--</span>
           </div>
           <div class="staff-item">
             <span class="staff-label">Administrativo</span>
-            <span class="staff-val" id="out_administrativo">Ing. Rodney Cañete</span>
+            <span class="staff-val" id="out_administrativo">--</span>
           </div>
         </div>
 
@@ -598,19 +570,19 @@
         <div class="metric-grid">
           <div class="metric-card">
             <span class="m-title">Atendidos</span>
-            <div class="m-value" id="out_atendidos">20</div>
+            <div class="m-value" id="out_atendidos">0</div>
           </div>
           <div class="metric-card efectivos">
             <span class="m-title">Efectivos</span>
-            <div class="m-value" id="out_efectivos">16</div>
+            <div class="m-value" id="out_efectivos">0</div>
           </div>
           <div class="metric-card volumenes">
             <span class="m-title">Volúmenes</span>
-            <div class="m-value" id="out_volumenes">48</div>
+            <div class="m-value" id="out_volumenes">0</div>
           </div>
           <div class="metric-card vidas">
             <span class="m-title">Vidas Asistidas</span>
-            <div class="m-value" id="out_vidas">48</div>
+            <div class="m-value" id="out_vidas">0</div>
           </div>
         </div>
 
@@ -628,18 +600,18 @@
             <tbody>
               <tr>
                 <td>Donantes Evaluados / Atendidos</td>
-                <td class="text-right" id="t_atendidos" style="font-weight:700;">20</td>
+                <td class="text-right" id="t_atendidos" style="font-weight:700;">0</td>
                 <td class="text-right">100%</td>
               </tr>
               <tr class="highlight">
                 <td>Donaciones Efectivas (Aptos)</td>
-                <td class="text-right" id="t_efectivos">16</td>
-                <td class="text-right" id="t_efectivos_pct">80%</td>
+                <td class="text-right" id="t_efectivos">0</td>
+                <td class="text-right" id="t_efectivos_pct">0%</td>
               </tr>
               <tr>
                 <td>Diferimientos Temporales</td>
-                <td class="text-right" id="t_diftemp">4</td>
-                <td class="text-right" id="t_diftemp_pct">20%</td>
+                <td class="text-right" id="t_diftemp">0</td>
+                <td class="text-right" id="t_diftemp_pct">0%</td>
               </tr>
               <tr>
                 <td>Diferimientos Permanentes</td>
@@ -694,18 +666,15 @@
       document.getElementById('out_ciudad').textContent = ciudad;
       document.getElementById('out_horario').textContent = horario;
 
-      // Actualizar encargados
       document.getElementById('out_encargado_colecta').textContent = encColecta;
       document.getElementById('out_encargado_inst').textContent = encInst ? encInst : '--';
       document.getElementById('out_administrativo').textContent = admin;
 
-      // Métricas
       document.getElementById('out_atendidos').textContent = atendidos;
       document.getElementById('out_efectivos').textContent = efectivos;
       document.getElementById('out_volumenes').textContent = volumenes;
       document.getElementById('out_vidas').textContent = vidas;
 
-      // Tabla
       document.getElementById('t_atendidos').textContent = atendidos;
       document.getElementById('t_efectivos').textContent = efectivos;
       document.getElementById('t_diftemp').textContent = diftemp;
@@ -723,7 +692,6 @@
         document.getElementById('t_difperm_pct').textContent = '-';
       }
 
-      // Observaciones
       const obsBox = document.getElementById('obs_box');
       if (obs.length > 0) {
         obsBox.style.display = 'block';
@@ -734,24 +702,28 @@
     }
 
     function limpiar() {
-      // Vacía todos los campos sin pedir confirmación
-      document.getElementById('f_institucion').value = '';
-      document.getElementById('f_fecha').value = '';
-      document.getElementById('f_ciudad').value = '';
-      document.getElementById('f_horario').value = '';
-      document.getElementById('f_encargado_colecta').value = '';
-      document.getElementById('f_encargado_inst').value = '';
-      document.getElementById('f_administrativo').value = 'Ing. Rodney Cañete';
-
-      document.getElementById('f_atendidos').value = '';
-      document.getElementById('f_efectivos').value = '';
-      document.getElementById('f_volumenes').value = '';
-      document.getElementById('f_vidas').value = '';
-      document.getElementById('f_diftemp').value = '';
-      document.getElementById('f_difperm').value = '';
-      document.getElementById('f_obs').value = '';
-
+      document.getElementById('colectaForm').reset();
       actualizar();
+    }
+
+    // Función de Descarga Directa a PDF
+    function descargarPDFDirecto() {
+      const elemento = document.getElementById('areaReporte');
+      const institucion = document.getElementById('f_institucion').value.trim() || 'Colecta';
+      const fecha = document.getElementById('f_fecha').value.trim() || 'Fecha';
+
+      // Nombre del archivo limpio sin caracteres extraños
+      const nombreLimpio = `Resumen_${institucion.replace(/[^a-zA-Z0-9]/g, '_')}_${fecha.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+      const opciones = {
+        margin:       [8, 10, 8, 10],
+        filename:     nombreLimpio,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opciones).from(elemento).save();
     }
 
     window.onload = function() {
