@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen de Colecta de Sangre - Centro Productor de Sangre y Terapia Celular</title>
   
-  <!-- Librería para PDF directo -->
+  <!-- Librería única para PDF e Imagen Canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Librería robusta para captura en Imagen PNG -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
   <style>
     :root {
@@ -763,34 +761,30 @@
       html2pdf().set(opciones).from(elemento).save();
     }
 
-    // Descarga en PNG garantizada con dom-to-image
+    // Descarga en PNG usando el canvas nativo de html2pdf
     function descargarPNGDirecto() {
-      const nodo = document.getElementById('areaReporte');
+      const elemento = document.getElementById('areaReporte');
       const nombreLimpio = obtenerNombreArchivo('png');
       const btnTxt = document.getElementById('txtBtnPng');
       
       btnTxt.textContent = 'Generando...';
 
-      // Captura directa en PNG nítido con fondo blanco
-      domtoimage.toPng(nodo, {
-        bgcolor: '#ffffff',
-        quality: 1
-      })
-      .then(function (dataUrl) {
+      const worker = html2pdf().from(elemento).set({
+        html2canvas: { scale: 2.2, useCORS: true, logging: false }
+      });
+
+      worker.toCanvas().then(function (canvas) {
         btnTxt.textContent = 'Descargar PNG';
-        
-        // Crear elemento de descarga
+        const imagenUrl = canvas.toDataURL('image/png');
         const enlace = document.createElement('a');
         enlace.download = nombreLimpio;
-        enlace.href = dataUrl;
+        enlace.href = imagenUrl;
         document.body.appendChild(enlace);
         enlace.click();
         document.body.removeChild(enlace);
-      })
-      .catch(function (error) {
+      }).catch(function (error) {
         btnTxt.textContent = 'Descargar PNG';
-        console.error('Error al generar PNG:', error);
-        alert('Hubo un problema al generar la imagen. Asegúrate de estar conectado a internet para cargar la biblioteca.');
+        console.error('Error al generar imagen:', error);
       });
     }
 
