@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen de Colecta de Sangre - Centro Productor de Sangre y Terapia Celular</title>
   
-  <!-- Librería única para PDF e Imagen Canvas -->
+  <!-- Librería directa para captura y descarga en PNG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Librería para descarga directa en PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -761,7 +763,7 @@
       html2pdf().set(opciones).from(elemento).save();
     }
 
-    // Descarga en PNG usando el canvas nativo de html2pdf
+    // Descarga directa a imagen PNG
     function descargarPNGDirecto() {
       const elemento = document.getElementById('areaReporte');
       const nombreLimpio = obtenerNombreArchivo('png');
@@ -769,22 +771,39 @@
       
       btnTxt.textContent = 'Generando...';
 
-      const worker = html2pdf().from(elemento).set({
-        html2canvas: { scale: 2.2, useCORS: true, logging: false }
-      });
-
-      worker.toCanvas().then(function (canvas) {
+      html2canvas(elemento, {
+        scale: 2.5,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      }).then(function(canvas) {
         btnTxt.textContent = 'Descargar PNG';
-        const imagenUrl = canvas.toDataURL('image/png');
-        const enlace = document.createElement('a');
-        enlace.download = nombreLimpio;
-        enlace.href = imagenUrl;
-        document.body.appendChild(enlace);
-        enlace.click();
-        document.body.removeChild(enlace);
-      }).catch(function (error) {
+        
+        // Convertir a blob para descarga directa sin bloqueos de tamaño
+        canvas.toBlob(function(blob) {
+          if (!blob) {
+            // Método alternativo si falla el blob
+            const enlaceAlt = document.createElement('a');
+            enlaceAlt.download = nombreLimpio;
+            enlaceAlt.href = canvas.toDataURL('image/png');
+            enlaceAlt.click();
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          const enlace = document.createElement('a');
+          enlace.href = url;
+          enlace.download = nombreLimpio;
+          document.body.appendChild(enlace);
+          enlace.click();
+          document.body.removeChild(enlace);
+          setTimeout(function() {
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }, 'image/png');
+      }).catch(function(error) {
         btnTxt.textContent = 'Descargar PNG';
-        console.error('Error al generar imagen:', error);
+        console.error('Error al generar PNG:', error);
       });
     }
 
